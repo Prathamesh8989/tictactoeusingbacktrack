@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Tic Tac Toe | Backtracking Demo</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f8f9fa;
+      text-align: center;
+      margin-top: 40px;
+    }
+    h1 {
+      color: #222;
+    }
+    table {
+      margin: 0 auto;
+      border-collapse: collapse;
+    }
+    td {
+      width: 80px;
+      height: 80px;
+      border: 3px solid #333;
+      font-size: 2.5rem;
+      text-align: center;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+    td:hover { background-color: #e9ecef; }
+    pre {
+      background: #111;
+      color: #00ff99;
+      text-align: left;
+      padding: 10px;
+      margin: 20px auto;
+      width: 80%;
+      height: 200px;
+      overflow-y: auto;
+      border-radius: 6px;
+      font-size: 0.9rem;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 1rem;
+      border: none;
+      background-color: #007bff;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <h1>🤖 Tic Tac Toe (Backtracking Visualization)</h1>
+  <table id="board"></table>
+  <button onclick="resetGame()">Restart</button>
+
+  <h3>Backtracking Trace:</h3>
+  <pre id="traceLog"></pre>
+
+  <script>
+    let board = Array(9).fill(null);
+    const tbl = document.getElementById('board');
+    const log = document.getElementById('traceLog');
+
+    function render() {
+      tbl.innerHTML = '';
+      for (let i = 0; i < 3; i++) {
+        const row = document.createElement('tr');
+        for (let j = 0; j < 3; j++) {
+          const idx = i * 3 + j;
+          const cell = document.createElement('td');
+          cell.textContent = board[idx] || '';
+          cell.onclick = () => playerMove(idx);
+          row.appendChild(cell);
+        }
+        tbl.appendChild(row);
+      }
+    }
+
+    async function playerMove(idx) {
+      if (board[idx] || winner(board)) return;
+      board[idx] = 'X';
+      render();
+
+      if (winner(board)) {
+        alert('Game Over: ' + winner(board));
+        return;
+      }
+
+      const res = await fetch('/move', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ board })
+      });
+      const data = await res.json();
+      if (data.move !== -1) board[data.move] = 'O';
+      render();
+
+      // Show backtracking trace
+      log.textContent = data.trace.join('\n');
+
+      if (winner(board)) {
+        alert('Game Over: ' + winner(board));
+      }
+    }
+
+    function winner(b) {
+      const lines = [
+        [0,1,2],[3,4,5],[6,7,8],
+        [0,3,6],[1,4,7],[2,5,8],
+        [0,4,8],[2,4,6]
+      ];
+      for (const [a, b1, c] of lines) {
+        if (b[a] && b[a] === b[b1] && b[a] === b[c]) return b[a];
+      }
+      return b.includes(null) ? null : 'Draw';
+    }
+
+    function resetGame() {
+      board = Array(9).fill(null);
+      log.textContent = '';
+      render();
+    }
+
+    render();
+  </script>
+</body>
+</html>
