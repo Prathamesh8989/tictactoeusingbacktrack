@@ -198,7 +198,3 @@ def minimax(board, is_max, depth=0, trace=None):
 The AI is unbeatable. Every game either ends in a draw (if you play perfectly) or a loss for the human. This is a provable property of Minimax on a fully explored game tree.
 
 ---
-
-## License
-
-MIT
